@@ -1,0 +1,1 @@
+export default function HealthPage(){return <main className="p-8"><h1 className="text-2xl font-bold">Health Check</h1><p className="mt-2 text-slate-600">Use GET /health for machine verification.</p></main>}
