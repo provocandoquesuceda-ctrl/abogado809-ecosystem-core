@@ -1,0 +1,76 @@
+name: Phase 2 Verification
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/abogado809
+      AUTH_SECRET: phase2-verification-secret
+      AUTH_GOOGLE_ID: test-google-id
+      AUTH_GOOGLE_SECRET: test-google-secret
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prisma generate
+        run: npx prisma generate
+
+      - name: Next build
+        run: npm run build
+
+      - name: Start application
+        run: |
+          npm run start > /tmp/abogado809.log 2>&1 &
+          echo $! > /tmp/abogado809.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:3000/health > /tmp/health.json; then
+              break
+            fi
+            sleep 2
+          done
+          cat /tmp/abogado809.log || true
+          test -s /tmp/health.json
+
+      - name: Smoke test
+        run: npm run smoke
+
+      - name: Health check
+        run: |
+          curl -fsS http://127.0.0.1:3000/health
+          echo
+          for route in / /buscar /login /registro /dashboard; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:3000$route")
+            echo "$route -> $code"
+            test "$code" -ge 200
+            test "$code" -lt 400
+          done
+
+      - name: Capture evidence
+        if: always()
+        run: |
+          mkdir -p evidence/phase2
+          cp /tmp/abogado809.log evidence/phase2/server.log 2>/dev/null || true
+          cp /tmp/health.json evidence/phase2/health.json 2>/dev/null || true
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2-verification-evidence
+          path: evidence/phase2
+          if-no-files-found: warn
