@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function BuscarPage(){return <main className="p-8"><h1 className="text-2xl font-bold">Buscar abogados</h1><p className="mt-2 text-slate-600">Módulo base preparado para búsqueda por ciudad y especialidad.</p><Link className="mt-6 inline-block underline" href="/">Volver</Link></main>}
