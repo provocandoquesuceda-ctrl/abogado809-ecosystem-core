@@ -1,0 +1,11 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+
+enum Role { USER LAWYER ADMIN }
+enum Plan { FREE BASIC PRO }
+enum Ciudad { SANTO_DOMINGO SANTIAGO LA_ROMANA SAN_PEDRO_DE_MACORIS LA_VEGA SAN_CRISTOBAL PUERTO_PLATA OTRO }
+model User { id String @id @default(cuid()); email String @unique; password String?; name String?; role Role @default(USER); profile AbogadoPerfil?; createdAt DateTime @default(now()); updatedAt DateTime @updatedAt }
+model Especialidad { id String @id @default(cuid()); nombre String; slug String @unique; icono String?; perfiles AbogadoPerfil[] @relation("PerfilEspecialidades") }
+model AbogadoPerfil { id String @id @default(cuid()); userId String @unique; user User @relation(fields:[userId],references:[id],onDelete:Cascade); slug String @unique; titulo String?; nombre String; apellidos String; descripcion String?; whatsapp String?; emailPublico String?; ciudad Ciudad @default(SANTO_DOMINGO); direccion String?; universidad String?; anioGraduacion Int?; exequatur String?; verificado Boolean @default(false); plan Plan @default(FREE); visitas Int @default(0); ratingAvg Float @default(0); ratingCount Int @default(0); especialidades Especialidad[] @relation("PerfilEspecialidades"); experiencias Experiencia[]; resenas Resena[]; createdAt DateTime @default(now()); updatedAt DateTime @updatedAt }
+model Experiencia { id String @id @default(cuid()); perfilId String; perfil AbogadoPerfil @relation(fields:[perfilId],references:[id],onDelete:Cascade); cargo String; empresa String; desde DateTime; actual Boolean @default(false); hasta DateTime? }
+model Resena { id String @id @default(cuid()); perfilId String; perfil AbogadoPerfil @relation(fields:[perfilId],references:[id],onDelete:Cascade); nombre String; puntuacion Int; comentario String?; createdAt DateTime @default(now()) }
