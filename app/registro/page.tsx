@@ -1,0 +1,1 @@
+export default function RegistroPage(){return <main className="mx-auto max-w-md p-8"><h1 className="text-2xl font-bold">Registro</h1><p className="mt-2 text-slate-600">Base preparada para registro con validación Zod y persistencia Prisma.</p></main>}
