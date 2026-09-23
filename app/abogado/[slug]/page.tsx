@@ -1,3 +1,8 @@
+export const dynamic="force-dynamic";
 import {notFound} from "next/navigation";
 import {prisma} from "@/lib/prisma";
-export default async function LawyerPage({params}:{params:{slug:string}}){const lawyer=await prisma.abogadoPerfil.findUnique({where:{slug:params.slug},include:{especialidades:true}});if(!lawyer) notFound();return <main className="mx-auto max-w-3xl p-8"><p className="text-sm text-slate-500">{lawyer.ciudad}</p><h1 className="mt-2 text-3xl font-bold">{lawyer.nombre} {lawyer.apellidos}</h1><p className="mt-2">{lawyer.titulo??"Abogado"}</p><p className="mt-6 text-slate-600">{lawyer.descripcion??"Perfil profesional."}</p><div className="mt-6 flex flex-wrap gap-2">{lawyer.especialidades.map(s=><span key={s.id} className="rounded-full bg-slate-100 px-3 py-1 text-sm">{s.nombre}</span>)}</div></main>}
+export default async function LawyerPage({params}:{params:{slug:string}}){
+ const lawyer=await prisma.abogadoPerfil.findUnique({where:{slug:params.slug},include:{especialidades:true}});
+ if(!lawyer) notFound();
+ return <main className="mx-auto max-w-3xl p-8"><h1 className="text-3xl font-bold">{lawyer.nombre} {lawyer.apellidos}</h1><p>{lawyer.descripcion??"Perfil profesional."}</p></main>;
+}
