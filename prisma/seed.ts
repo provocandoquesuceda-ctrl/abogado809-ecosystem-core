@@ -1,0 +1,4 @@
+import {PrismaClient} from "@prisma/client";
+const prisma=new PrismaClient();
+async function main(){const civil=await prisma.especialidad.upsert({where:{slug:"derecho-civil"},update:{},create:{nombre:"Derecho Civil",slug:"derecho-civil"}});const email="demo@example.local";const user=await prisma.user.upsert({where:{email},update:{},create:{email,name:"Abogado Demo",role:"LAWYER"}});await prisma.abogadoPerfil.upsert({where:{userId:user.id},update:{},create:{userId:user.id,slug:"abogado-demo",nombre:"Abogado",apellidos:"Demo",descripcion:"Perfil de demostración para pruebas locales.",especialidades:{connect:[{id:civil.id}]}}});}
+main().finally(()=>prisma.$disconnect());
