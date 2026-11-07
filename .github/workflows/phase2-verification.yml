@@ -63,8 +63,16 @@ jobs:
         if: always()
         run: |
           mkdir -p evidence/phase2
-          cp /tmp/abogado809.log evidence/phase2/server.log 2>/dev/null || true
-          cp /tmp/health.json evidence/phase2/health.json 2>/dev/null || true
+          {
+            echo "run_id=$GITHUB_RUN_ID"
+            echo "run_attempt=$GITHUB_RUN_ATTEMPT"
+            echo "commit=$GITHUB_SHA"
+            echo "branch=$GITHUB_REF_NAME"
+            echo "event=$GITHUB_EVENT_NAME"
+            echo "captured_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > evidence/phase2/run-metadata.txt
+          if [ -f /tmp/abogado809.log ]; then cp /tmp/abogado809.log evidence/phase2/server.log; else echo "Application did not start; see workflow job logs." > evidence/phase2/server-not-started.txt; fi
+          if [ -f /tmp/health.json ]; then cp /tmp/health.json evidence/phase2/health.json; else echo "Health endpoint was not reached; see workflow job logs." > evidence/phase2/health-not-reached.txt; fi
 
       - name: Upload evidence
         if: always()
@@ -72,4 +80,4 @@ jobs:
         with:
           name: phase2-verification-evidence
           path: evidence/phase2
-          if-no-files-found: warn
+          if-no-files-found: error
